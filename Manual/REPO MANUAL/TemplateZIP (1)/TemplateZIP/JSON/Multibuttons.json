@@ -1,0 +1,18 @@
+{
+  "Author": "That one kid, redpenguin",
+  "Compatibility": "Compatible",
+  "DefuserDifficulty": "Easy",
+  "Description": "Use edgework to do some autoclicking Tags: buttons, copycat, amount, edgework",
+  "ExpertDifficulty": "Easy",
+  "ModuleID": "Multibuttons",
+  "Name": "Multi-buttons",
+  "ObsoleteSteamIDs": [ "0" ],
+  "Origin": "Mods",
+  "Published": "2022-01-23",
+  "SortKey": "MULTIBUTTONS",
+  "SourceUrl": "https://github.com/Kbushra/KtaneMultibuttons",
+  "Souvenir": { "Status": "NotACandidate" },
+  "SteamID": "0",
+  "Symbol": "Mubt",
+  "Type": "Regular"
+}

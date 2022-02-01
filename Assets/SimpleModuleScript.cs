@@ -170,6 +170,6 @@ public class SimpleModuleScript : MonoBehaviour {
 
 	void Log(string message)
 	{
-		Debug.LogFormat("[Module Name Here #{0}] {1}", ModuleId, message);
+		Debug.LogFormat("[Multi-buttons #{0}] {1}", ModuleId, message);
 	}
 }
