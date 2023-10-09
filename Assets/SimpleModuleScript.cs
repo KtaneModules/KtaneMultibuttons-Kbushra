@@ -16,8 +16,6 @@ public class SimpleModuleScript : MonoBehaviour {
     static int ModuleIdCounter = 1;
     int ModuleId;
 
-	public AudioSource playsound;
-
 	public int ans = 0;
 	public int InputAns = 0;
 	public int StageCur;
@@ -60,11 +58,11 @@ public class SimpleModuleScript : MonoBehaviour {
 			ans++;
 			Log ("There are more than 2 batteries");
 		}
+		Log ("Answer set!");
 	}
 
 	void pressedCylinder(KMSelectable pressedButton)
 	{
-		GetComponent<KMAudio>().PlayGameSoundAtTransformWithRef(KMSoundOverride.SoundEffect.ButtonPress, transform);
 		int buttonPosition = new int();
 		for(int i = 0; i < cylinders.Length; i++)
 		{
@@ -75,6 +73,8 @@ public class SimpleModuleScript : MonoBehaviour {
 			}
 		}
 
+		audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, cylinders[buttonPosition].transform);
+		cylinders [buttonPosition].AddInteractionPunch ();
 		switch (buttonPosition)
 		{
 			case 0:
@@ -101,7 +101,6 @@ public class SimpleModuleScript : MonoBehaviour {
 
 		if(incorrect)
 		{
-			playsound.Play ();
 			incorrect = false;
 			module.HandleStrike ();
 			InputAns = 0;
@@ -123,53 +122,95 @@ public class SimpleModuleScript : MonoBehaviour {
 		}
 		else 
 		{
-			playsound.Play ();
 			module.HandleStrike ();
 			Log ("Striked!");
 			InputAns = 0;
 		}
 	}
 
-	/*public void Button1()
+	#pragma warning disable 414
+	private readonly string TwitchHelpMessage = @"!{0} press <1/2/3> <#> [Presses the specified button '#' times] | !{0} submit [Presses the submit button]";
+	#pragma warning restore 414
+	IEnumerator ProcessTwitchCommand(string command)
 	{
-		if (info.GetBatteryCount () < 2) 
+		if (command.EqualsIgnoreCase("submit"))
 		{
-			module.HandleStrike ();
-			Log ("WRONG!");
+			yield return null;
+			cylinderSubmit.OnInteract();
+			yield break;
 		}
-		else 
+		string[] parameters = command.Split(' ');
+		if (parameters[0].ToLowerInvariant().StartsWith("press"))
 		{
-			InputAns++;
-			Log ("would like an answer");
+			if (parameters.Length == 1)
+			{
+				yield return "sendtochaterror Please specify a button and an amount of times to press the button!";
+				yield break;
+			}
+			if (parameters.Length == 2 && parameters[1].EqualsAny("1", "2", "3"))
+			{
+				yield return "sendtochaterror Please specify an amount of times to press the button!";
+				yield break;
+			}
+			if (parameters.Length == 2 && !parameters[1].EqualsAny("1", "2", "3"))
+			{
+				yield return "sendtochaterror!f The specified button '" + parameters[1] + "' is invalid!";
+				yield break;
+			}
+			if (parameters.Length > 3)
+			{
+				yield return "sendtochaterror Too many parameters!";
+				yield break;
+			}
+			if (!parameters[1].EqualsAny("1", "2", "3"))
+			{
+				yield return "sendtochaterror!f The specified button '" + parameters[1] + "' is invalid!";
+				yield break;
+			}
+			int times = -1;
+			if (!int.TryParse(parameters[2], out times))
+			{
+				yield return "sendtochaterror!f The specified amount '" + parameters[2] + "' is invalid!";
+				yield break;
+			}
+			if (times <= 0)
+			{
+				yield return "sendtochaterror A button cannot be pressed '" + times + "' times!";
+				yield break;
+			}
+			yield return null;
+			for (int i = 0; i < times; i++)
+			{
+				cylinders[int.Parse(parameters[1]) - 1].OnInteract();
+				yield return new WaitForSeconds(.1f);
+			}
 		}
 	}
-	public void Button2()
+
+	IEnumerator TwitchHandleForcedSolve()
 	{
-		if (info.GetBatteryCount () < 1) {
-			module.HandleStrike ();
-			Log ("WRONG!");
-		}
-		else 
+		if (InputAns > ans)
 		{
-			InputAns++;
-			Log ("would like an answer");
+			module.HandlePass();
+			yield break;
 		}
+		int validBtn = -1;
+		if (info.GetBatteryCount() >= 2)
+			validBtn = 0;
+		else if (info.GetBatteryCount() > 0)
+			validBtn = 1;
+		else
+			validBtn = 2;
+		while (InputAns != ans)
+		{
+			cylinders[validBtn].OnInteract();
+			yield return new WaitForSeconds(.1f);
+		}
+		cylinderSubmit.OnInteract();
 	}
-	public void Button3()
-	{
-		if (info.GetBatteryCount () < 1) {
-			InputAns++;
-			Log ("would like an answer");
-		} 
-		else 
-		{
-			module.HandleStrike ();
-			Log ("WRONG!");
-		}
-	}*/
 
 	void Log(string message)
 	{
-		Debug.LogFormat("[Multi-buttons #{0}] {1}", ModuleId, message);
+		Debug.LogFormat("[Multi-Buttons #{0}] {1}", ModuleId, message);
 	}
 }
